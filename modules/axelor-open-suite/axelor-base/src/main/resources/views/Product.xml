@@ -11,6 +11,7 @@
 	    <field name="picture" widget="Image"/>
 	    <field name="code" x-bind="{{code|unaccent|uppercase}}" width="120"/>
 	    <field name="name" width="300"/>
+		<field name="hsnNumber" width="200"/>
 	    <field name="productCategory" form-view="product-category-form" grid-view="product-category-grid"/>
 	    <field name="productFamily" form-view="product-family-form" grid-view="product-family-grid"/>
 	    <field name="productTypeSelect" width="100"/>
@@ -24,6 +25,7 @@
 	    <field name="picture" widget="Image"/>
 	    <field name="code" x-bind="{{code|unaccent|uppercase}}" width="120"/>
 	    <field name="name"/>
+		<field name="hsnNumber" width="200"/>
 	    <field name="productVariant" width="200"/>
 	    <field name="costPrice" width="120" x-scale="2"/>
 	    <field name="salePrice" width="120" x-scale="2"/>
@@ -45,6 +47,9 @@
           				<field name="code" x-bind="{{code|unaccent|uppercase}}" showTitle="false" colSpan="5" css="label-bold bold large" placeholder="Code" 
           					if="!__config__.app.getApp('base').getGenerateProductSequence()" required="true"/>
                   <field name="name" required="true" showTitle="false" colSpan="7" css="label-bold bold large" placeholder="Name" width="800"/>
+        			</editor>
+      			</field>
+				<field name="hsnNumber" required="true" showTitle="false" colSpan="7" css="label-bold bold large" placeholder="HSN-NUMBER" width="800"/>
         			</editor>
       			</field>
     		</panel>
@@ -323,6 +328,7 @@
 	    </toolbar>
 		<field name="picture" />
 		<field name="fullName" />
+		<field name="hsnNumber"/>
 		<field name="salePrice" x-scale="2" />
 		<field name="saleCurrency.symbol" />
 		<field name="productFamily" />

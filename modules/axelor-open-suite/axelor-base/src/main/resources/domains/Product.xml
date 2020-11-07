@@ -11,6 +11,7 @@
 			translatable="true" />
 		<string name="serialNumber" title="Serial Nbr"/>
 		<string name="code" title="Code" initParam="true" unique="true"/>
+		<string name="hsnNumber" title="HSN Number" initParam="true"/>
 
 		<string name="description" large="true" title="Description"
 			initParam="true" translatable="true" />

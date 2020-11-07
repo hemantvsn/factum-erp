@@ -208,6 +208,7 @@ public class ProductServiceImpl implements ProductService {
         new Product(
             productModel.getName() + " (" + productVariant.getName() + ")",
             productModel.getCode() + "-" + seq,
+            productModel.getHsnNumber(),
             description,
             internalDescription,
             productModel.getPicture(),

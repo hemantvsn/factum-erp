@@ -64,6 +64,7 @@ public class ProductSupplierServiceImpl implements ProductSupplierService {
         new Product(
             productSupplier.getProductCode(),
             productSupplier.getProductCode(),
+            null,
             productSupplier.getDescription(),
             null,
             productSupplier.getImgProduct(),
