@@ -69,6 +69,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
   @Inject protected PurchaseOrderLineTaxService purchaseOrderLineVatService;
 
+  @Inject protected PurchaseOrderTaxService purchaseOrderTaxService;
+
   @Inject protected SequenceService sequenceService;
 
   @Inject protected PartnerRepository partnerRepo;
@@ -129,11 +131,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         new Object[] {purchaseOrder.getPurchaseOrderLineList().size()});
 
     // create Tva lines
+    /*purchaseOrder
+    .getPurchaseOrderLineTaxList()
+    .addAll(
+        purchaseOrderLineVatService.createsPurchaseOrderLineTax(
+            purchaseOrder, purchaseOrder.getPurchaseOrderLineList()));*/
+
     purchaseOrder
-        .getPurchaseOrderLineTaxList()
-        .addAll(
-            purchaseOrderLineVatService.createsPurchaseOrderLineTax(
-                purchaseOrder, purchaseOrder.getPurchaseOrderLineList()));
+        .getPurchaseOrderTaxList()
+        .addAll(purchaseOrderTaxService.createsPurchaseOrderTax(purchaseOrder));
   }
 
   /**
