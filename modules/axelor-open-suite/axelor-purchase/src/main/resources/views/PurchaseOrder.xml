@@ -126,7 +126,10 @@
 				<field name="notes" colSpan="12" x-lite="true" widget="html"/>
 			</panel>
 			<panel name="taxPanel" title="Tax" colSpan="12">
-				<panel-related name="purchaseOrderLineTaxListPanel" field="purchaseOrderLineTaxList" readonly="true" title="Tax Lines" colSpan="12" grid-view="purchase-order-line-tax-grid" form-view="purchase-order-line-tax-form"/>
+				<!--<panel-related name="purchaseOrderLineTaxListPanel" field="purchaseOrderLineTaxList" readonly="true" title="Tax Lines" colSpan="12" grid-view="purchase-order-line-tax-grid" form-view="purchase-order-line-tax-form"/>-->
+				<field name="cgstTaxLine" canEdit="false" domain="self.tax.code='CGST'" form-view="tax-line-form" grid-view="tax-line-grid" colSpan="12"/>
+				<field name="sgstTaxLine" canEdit="false" domain="self.tax.code='SGST'" form-view="tax-line-form" grid-view="tax-line-grid" colSpan="12"/>
+				<field name="igstTaxLine" canEdit="false" domain="self.tax.code='IGST'" form-view="tax-line-form" grid-view="tax-line-grid" colSpan="12"/>
 			</panel>
 			<panel name="deliveryPanel" title="Delivery" colSpan="12">
 				<field name="deliveryDate" colSpan="3" onChange="action-purchase-order-method-update-purchase-order-lines-estimated-deliv-date"/>

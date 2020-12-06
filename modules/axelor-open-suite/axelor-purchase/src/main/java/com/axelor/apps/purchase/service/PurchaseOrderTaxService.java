@@ -57,6 +57,12 @@ public class PurchaseOrderTaxService {
       sgstTax.setTaxLine(taxLine);
 
       map.put(taxLine, sgstTax);
+
+      LOG.info(
+          "For PO = {}, \n SGST_TAX_LINE = {} \n and SGST_TAX = {}",
+          purchaseOrder,
+          taxLine,
+          sgstTax);
     }
 
     if (purchaseOrder.getCgstTaxLine() != null) {
@@ -68,6 +74,11 @@ public class PurchaseOrderTaxService {
       cgstTax.setTaxLine(taxLine);
 
       map.put(taxLine, cgstTax);
+      LOG.info(
+          "For PO = {}, \n CGST_TAX_LINE = {} and \n CGST_TAX = {}",
+          purchaseOrder,
+          taxLine,
+          cgstTax);
     }
 
     if (purchaseOrder.getIgstTaxLine() != null) {
@@ -79,6 +90,11 @@ public class PurchaseOrderTaxService {
       igstTax.setTaxLine(taxLine);
 
       map.put(taxLine, igstTax);
+      LOG.info(
+          "For PO = {}, \n IGST_TAX_LINE = {} and \n IGST_TAX = {}",
+          purchaseOrder,
+          taxLine,
+          igstTax);
     }
 
     for (PurchaseOrderTax purchaseOrderTax : map.values()) {
@@ -102,8 +118,12 @@ public class PurchaseOrderTaxService {
       purchaseOrderTaxList.add(purchaseOrderTax);
 
       LOG.debug(
-          "Ligne de TVA : Total TVA => {}, Total HT => {}",
-          new Object[] {purchaseOrderTax.getTaxTotal(), purchaseOrderTax.getInTaxTotal()});
+          "PO_EX_TAX => {}, TOTAL_TAX => {},  INCL_TAX => {}",
+          new Object[] {
+            purchaseOrder.getExTaxTotal(),
+            purchaseOrderTax.getTaxTotal(),
+            purchaseOrderTax.getInTaxTotal()
+          });
     }
 
     return purchaseOrderTaxList;

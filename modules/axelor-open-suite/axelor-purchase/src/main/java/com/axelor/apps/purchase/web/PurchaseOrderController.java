@@ -92,7 +92,22 @@ public class PurchaseOrderController {
 
     if (purchaseOrder != null) {
       try {
+
+        logger.info("============================================");
+        logger.info(
+            "BEFORE CALLING SERVICE ====> PO DETAILS - COMPANY => {}, SUPPLIER => {}, CURRENCY => {}",
+            purchaseOrder.getCompany(),
+            purchaseOrder.getSupplierPartner(),
+            purchaseOrder.getCurrency());
+
         purchaseOrder = Beans.get(PurchaseOrderService.class).computePurchaseOrder(purchaseOrder);
+
+        logger.info(
+            "AFTER CALLING SERVICE ====> PO DETAILS - COMPANY => {}, SUPPLIER => {}, CURRENCY => {}",
+            purchaseOrder.getCompany(),
+            purchaseOrder.getSupplierPartner(),
+            purchaseOrder.getCurrency());
+        logger.info("============================================");
         response.setValues(purchaseOrder);
       } catch (Exception e) {
         TraceBackService.trace(response, e);

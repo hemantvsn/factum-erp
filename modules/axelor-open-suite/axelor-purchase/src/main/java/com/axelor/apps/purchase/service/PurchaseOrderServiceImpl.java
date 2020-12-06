@@ -41,6 +41,7 @@ import com.axelor.apps.base.service.administration.SequenceService;
 import com.axelor.apps.purchase.db.PurchaseOrder;
 import com.axelor.apps.purchase.db.PurchaseOrderLine;
 import com.axelor.apps.purchase.db.PurchaseOrderLineTax;
+import com.axelor.apps.purchase.db.PurchaseOrderTax;
 import com.axelor.apps.purchase.db.repo.PurchaseOrderRepository;
 import com.axelor.apps.purchase.exception.IExceptionMessage;
 import com.axelor.apps.purchase.report.IReport;
@@ -104,12 +105,21 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
   public PurchaseOrder computePurchaseOrder(PurchaseOrder purchaseOrder) throws AxelorException {
 
     this.initPurchaseOrderLineTax(purchaseOrder);
+    this.initPurchaseOrderTax(purchaseOrder);
 
     this._computePurchaseOrderLines(purchaseOrder);
 
     this._populatePurchaseOrder(purchaseOrder);
 
     this._computePurchaseOrder(purchaseOrder);
+
+    logger.info("==========FINISHED computePurchaseOrder method==============");
+
+    logger.info(
+        "AFTER CALLING SERVICE ====> PO DETAILS - COMPANY => {}, SUPPLIER => {}, CURRENCY => {}",
+        purchaseOrder.getCompany(),
+        purchaseOrder.getSupplierPartner(),
+        purchaseOrder.getCurrency());
 
     return purchaseOrder;
   }
@@ -127,19 +137,14 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
   public void _populatePurchaseOrder(PurchaseOrder purchaseOrder) throws AxelorException {
 
     logger.debug(
-        "Peupler une facture => lignes de devis: {} ",
-        new Object[] {purchaseOrder.getPurchaseOrderLineList().size()});
+        "For PO = {}, The Lines = {} ", purchaseOrder, purchaseOrder.getPurchaseOrderLineList());
 
     // create Tva lines
-    /*purchaseOrder
-    .getPurchaseOrderLineTaxList()
-    .addAll(
-        purchaseOrderLineVatService.createsPurchaseOrderLineTax(
-            purchaseOrder, purchaseOrder.getPurchaseOrderLineList()));*/
-
     purchaseOrder
-        .getPurchaseOrderTaxList()
-        .addAll(purchaseOrderTaxService.createsPurchaseOrderTax(purchaseOrder));
+        .getPurchaseOrderLineTaxList()
+        .addAll(
+            purchaseOrderLineVatService.createsPurchaseOrderLineTax(
+                purchaseOrder, purchaseOrder.getPurchaseOrderLineList()));
   }
 
   /**
@@ -165,19 +170,32 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
           purchaseOrder.getCompanyExTaxTotal().add(purchaseOrderLine.getCompanyExTaxTotal()));
     }
 
-    for (PurchaseOrderLineTax purchaseOrderLineVat : purchaseOrder.getPurchaseOrderLineTaxList()) {
+    purchaseOrder
+        .getPurchaseOrderTaxList()
+        .addAll(purchaseOrderTaxService.createsPurchaseOrderTax(purchaseOrder));
+
+    /**
+     * for (PurchaseOrderLineTax purchaseOrderLineVat : purchaseOrder.getPurchaseOrderLineTaxList())
+     * {
+     *
+     * <p>// In the purchase order currency purchaseOrder.setTaxTotal(
+     * purchaseOrder.getTaxTotal().add(purchaseOrderLineVat.getTaxTotal())); }
+     */
+    for (PurchaseOrderTax purchaseOrderTax : purchaseOrder.getPurchaseOrderTaxList()) {
 
       // In the purchase order currency
-      purchaseOrder.setTaxTotal(
-          purchaseOrder.getTaxTotal().add(purchaseOrderLineVat.getTaxTotal()));
+      purchaseOrder.setTaxTotal(purchaseOrder.getTaxTotal().add(purchaseOrderTax.getTaxTotal()));
     }
 
     purchaseOrder.setInTaxTotal(purchaseOrder.getExTaxTotal().add(purchaseOrder.getTaxTotal()));
 
     logger.debug(
-        "Montant de la facture: HTT = {},  HT = {}, TVA = {}, TTC = {}",
+        "FOR PO => {}, \n EXCL_TAX = {} \n TOTAL_TAX = {} \n INCL_TAX = {}",
         new Object[] {
-          purchaseOrder.getExTaxTotal(), purchaseOrder.getTaxTotal(), purchaseOrder.getInTaxTotal()
+          purchaseOrder,
+          purchaseOrder.getExTaxTotal(),
+          purchaseOrder.getTaxTotal(),
+          purchaseOrder.getInTaxTotal()
         });
   }
 
@@ -194,6 +212,23 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     } else {
       purchaseOrder.getPurchaseOrderLineTaxList().clear();
     }
+    logger.info("Initialized PurchaseOrderLineTaxList to EMPTY_ARRAY for PO = {}", purchaseOrder);
+  }
+
+  /**
+   * Initializes the Purchase Order tax to EMPTY_LIST
+   *
+   * @param purchaseOrder Une commande.
+   */
+  private void initPurchaseOrderTax(PurchaseOrder purchaseOrder) {
+
+    if (null == purchaseOrder.getPurchaseOrderTaxList()) {
+      purchaseOrder.setPurchaseOrderTaxList(new ArrayList<PurchaseOrderTax>());
+    } else {
+      purchaseOrder.getPurchaseOrderTaxList().clear();
+    }
+
+    logger.info("Initialized PurchaseOrderTaxList to EMPTY_ARRAY for PO = {}", purchaseOrder);
   }
 
   @Override
