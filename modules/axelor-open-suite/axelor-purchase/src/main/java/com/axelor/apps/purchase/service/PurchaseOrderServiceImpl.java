@@ -41,8 +41,8 @@ import com.axelor.apps.base.service.administration.SequenceService;
 import com.axelor.apps.purchase.db.PurchaseOrder;
 import com.axelor.apps.purchase.db.PurchaseOrderLine;
 import com.axelor.apps.purchase.db.PurchaseOrderLineTax;
-import com.axelor.apps.purchase.db.PurchaseOrderTax;
 import com.axelor.apps.purchase.db.repo.PurchaseOrderRepository;
+import com.axelor.apps.purchase.db.repo.PurchaseOrderTaxRepository;
 import com.axelor.apps.purchase.exception.IExceptionMessage;
 import com.axelor.apps.purchase.report.IReport;
 import com.axelor.apps.purchase.service.app.AppPurchaseService;
@@ -61,6 +61,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +86,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
   @Inject protected PurchaseOrderRepository purchaseOrderRepo;
 
   @Inject protected ProductCompanyService productCompanyService;
+
+  @Inject protected PurchaseOrderTaxRepository purchaseOrderTaxRepository;
 
   @Override
   public PurchaseOrder _computePurchaseOrderLines(PurchaseOrder purchaseOrder)
@@ -115,11 +122,21 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     logger.info("==========FINISHED computePurchaseOrder method==============");
 
-    logger.info(
-        "AFTER CALLING SERVICE ====> PO DETAILS - COMPANY => {}, SUPPLIER => {}, CURRENCY => {}",
-        purchaseOrder.getCompany(),
-        purchaseOrder.getSupplierPartner(),
-        purchaseOrder.getCurrency());
+    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    Validator validator = factory.getValidator();
+
+    logger.info("======================= FETCHING VALIDATION ERRORS============================");
+
+    logger.info("COMPANY = {}", purchaseOrder.getCompany());
+    logger.info("SUPPLIER = {}", purchaseOrder.getSupplierPartner());
+    logger.info("CURRENCY = {}", purchaseOrder.getCurrency());
+
+    Set<ConstraintViolation<PurchaseOrder>> violations = validator.validate(purchaseOrder);
+    for (ConstraintViolation<PurchaseOrder> violation : violations) {
+      logger.error("{}", violation);
+    }
+
+    logger.info("======================= FETCHING VALIDATION ERRORS============================");
 
     return purchaseOrder;
   }
@@ -170,9 +187,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
           purchaseOrder.getCompanyExTaxTotal().add(purchaseOrderLine.getCompanyExTaxTotal()));
     }
 
-    purchaseOrder
-        .getPurchaseOrderTaxList()
-        .addAll(purchaseOrderTaxService.createsPurchaseOrderTax(purchaseOrder));
+    purchaseOrderTaxService.setCGST(purchaseOrder);
+    purchaseOrderTaxService.setSGST(purchaseOrder);
+    purchaseOrderTaxService.setIGST(purchaseOrder);
 
     /**
      * for (PurchaseOrderLineTax purchaseOrderLineVat : purchaseOrder.getPurchaseOrderLineTaxList())
@@ -180,11 +197,25 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
      *
      * <p>// In the purchase order currency purchaseOrder.setTaxTotal(
      * purchaseOrder.getTaxTotal().add(purchaseOrderLineVat.getTaxTotal())); }
+     *
+     * <p>for (PurchaseOrderTax purchaseOrderTax : purchaseOrder.getPurchaseOrderTaxList()) {
+     *
+     * <p>// In the purchase order currency
+     * purchaseOrder.setTaxTotal(purchaseOrder.getTaxTotal().add(purchaseOrderTax.getTaxTotal())); }
      */
-    for (PurchaseOrderTax purchaseOrderTax : purchaseOrder.getPurchaseOrderTaxList()) {
+    if (purchaseOrder.getCgstTax() != null) {
+      purchaseOrder.setTaxTotal(
+          purchaseOrder.getTaxTotal().add(purchaseOrder.getCgstTax().getTaxTotal()));
+    }
 
-      // In the purchase order currency
-      purchaseOrder.setTaxTotal(purchaseOrder.getTaxTotal().add(purchaseOrderTax.getTaxTotal()));
+    if (purchaseOrder.getSgstTax() != null) {
+      purchaseOrder.setTaxTotal(
+          purchaseOrder.getTaxTotal().add(purchaseOrder.getSgstTax().getTaxTotal()));
+    }
+
+    if (purchaseOrder.getIgstTax() != null) {
+      purchaseOrder.setTaxTotal(
+          purchaseOrder.getTaxTotal().add(purchaseOrder.getIgstTax().getTaxTotal()));
     }
 
     purchaseOrder.setInTaxTotal(purchaseOrder.getExTaxTotal().add(purchaseOrder.getTaxTotal()));
@@ -221,12 +252,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
    * @param purchaseOrder Une commande.
    */
   private void initPurchaseOrderTax(PurchaseOrder purchaseOrder) {
-
-    if (null == purchaseOrder.getPurchaseOrderTaxList()) {
-      purchaseOrder.setPurchaseOrderTaxList(new ArrayList<PurchaseOrderTax>());
-    } else {
-      purchaseOrder.getPurchaseOrderTaxList().clear();
-    }
 
     logger.info("Initialized PurchaseOrderTaxList to EMPTY_ARRAY for PO = {}", purchaseOrder);
   }

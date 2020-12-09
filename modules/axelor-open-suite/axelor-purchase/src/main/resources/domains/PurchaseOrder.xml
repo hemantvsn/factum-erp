@@ -12,9 +12,15 @@
   		if(purchaseOrderSeq==null){
   			return " ";
   		}
+  		
+  		if(supplierPartner == null) {
+  			return purchaseOrderSeq;
+  		}
+  		
   		return purchaseOrderSeq + "-" + supplierPartner.getName();
   	]]>
   	</string>
+  	
   	<string name="purchaseOrderSeq" title="Ref." readonly="true"/>
   	<many-to-one name="company" ref="com.axelor.apps.base.db.Company" required="true" title="Company"/>
   	
@@ -38,15 +44,20 @@
 <!-- Ligne de TVA -->	
 	<one-to-many name="purchaseOrderLineTaxList" ref="com.axelor.apps.purchase.db.PurchaseOrderLineTax" mappedBy="purchaseOrder" title="PO Line Tax Lines"/>
 
-	<one-to-many name="purchaseOrderTaxList" ref="com.axelor.apps.purchase.db.PurchaseOrderTax" mappedBy="purchaseOrder" title="PO Tax Lines"/>
-
 <!-- Validation and totals -->	
     <many-to-one name="validatedByUser" ref="com.axelor.auth.db.User" readonly="true" title="Validated by"/> 
   	<date name="validationDate" title="Validation date" readonly="true"/>
 
-	<many-to-one name="sgstTaxLine" ref="com.axelor.apps.account.db.TaxLine" title="SGST Tax"/>
-	<many-to-one name="cgstTaxLine" ref="com.axelor.apps.account.db.TaxLine" title="CGST Tax"/>
-	<many-to-one name="igstTaxLine" ref="com.axelor.apps.account.db.TaxLine" title="IGST Tax"/>
+	<many-to-one name="sgstTaxLine" ref="com.axelor.apps.account.db.TaxLine" title="SGST Tax" required="true"/>
+	<many-to-one name="cgstTaxLine" ref="com.axelor.apps.account.db.TaxLine" title="CGST Tax" required="true"/>
+	<many-to-one name="igstTaxLine" ref="com.axelor.apps.account.db.TaxLine" title="IGST Tax" required="true"/>
+	
+	
+	
+	
+	<one-to-one ref="com.axelor.apps.purchase.db.PurchaseOrderTax" name="sgstTax" readonly="true"></one-to-one>
+	<one-to-one ref="com.axelor.apps.purchase.db.PurchaseOrderTax" name="cgstTax" readonly="true"></one-to-one>
+	<one-to-one ref="com.axelor.apps.purchase.db.PurchaseOrderTax" name="igstTax" readonly="true"></one-to-one>
 	
     <decimal name="exTaxTotal" title="Total W.T." scale="2" precision="20" readonly="true"/>
     <decimal name="taxTotal" title="Total Tax" scale="2" precision="20" readonly="true"/>
@@ -95,6 +106,7 @@
 		
 		  public static final int INVOICING_BY_DELIVERY = 2;
 		  public static final int INVOICING_PER_ORDER = 3;
+		  
    		]]>
    	</extra-code>
 	  

@@ -23,6 +23,7 @@ import com.axelor.apps.purchase.db.PurchaseOrderTax;
 import com.google.inject.Inject;
 import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,137 @@ public class PurchaseOrderTaxService {
 
   @Inject private PurchaseOrderToolService purchaseOrderToolService;
 
+  public void setSGST(PurchaseOrder po) {
+
+    if (po.getSgstTaxLine() == null) {
+      LOG.info("NO SGST LINE FOUND");
+      return;
+    }
+
+    PurchaseOrder fkey = new PurchaseOrder();
+    fkey.setId(po.getId());
+
+    TaxLine taxLine = po.getSgstTaxLine();
+    PurchaseOrderTax tax = new PurchaseOrderTax();
+
+    // tax.setId("SGST".hashCode() * po.getId());
+    tax.setTaxName("SGST");
+    tax.setTaxRate(
+        taxLine.getValue().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_EVEN) + "%");
+
+    tax.setPurchaseOrder(fkey);
+    tax.setExTaxBase(po.getExTaxTotal());
+    tax.setReverseCharged(false);
+    tax.setTaxLine(taxLine);
+
+    LOG.info("For PO = {}, \n SGST_TAX_LINE = {} \n and SGST_TAX = {}", po, taxLine, tax);
+
+    // Dans la devise de la commande
+    BigDecimal exTaxBase =
+        (tax.getReverseCharged()) ? tax.getExTaxBase().negate() : tax.getExTaxBase();
+
+    BigDecimal taxTotal = BigDecimal.ZERO;
+
+    if (tax.getTaxLine() != null)
+      taxTotal = purchaseOrderToolService.computeAmount(exTaxBase, tax.getTaxLine().getValue());
+
+    tax.setTaxTotal(taxTotal);
+    tax.setInTaxTotal(tax.getExTaxBase().add(taxTotal));
+
+    LOG.debug(
+        "PO_EX_TAX => {}, TOTAL_SGST_TAX => {},  INCL_TAX => {}",
+        new Object[] {tax.getExTaxBase(), tax.getTaxTotal(), tax.getInTaxTotal()});
+
+    po.setSgstTax(tax);
+  }
+
+  public void setCGST(PurchaseOrder po) {
+
+    if (po.getCgstTaxLine() == null) {
+      LOG.info("NO CGST LINE FOUND");
+      return;
+    }
+
+    PurchaseOrder fkey = new PurchaseOrder();
+    fkey.setId(po.getId());
+
+    TaxLine taxLine = po.getCgstTaxLine();
+    PurchaseOrderTax tax = new PurchaseOrderTax();
+
+    // tax.setId("CGST".hashCode() * po.getId());
+    tax.setTaxName("CGST");
+    tax.setTaxRate(
+        taxLine.getValue().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_EVEN) + "%");
+
+    tax.setPurchaseOrder(fkey);
+    tax.setExTaxBase(po.getExTaxTotal());
+    tax.setReverseCharged(false);
+    tax.setTaxLine(taxLine);
+
+    LOG.info("For PO = {}, \n CGST_TAX_LINE = {} \n and CGST_TAX = {}", po, taxLine, tax);
+
+    // Dans la devise de la commande
+    BigDecimal exTaxBase =
+        (tax.getReverseCharged()) ? tax.getExTaxBase().negate() : tax.getExTaxBase();
+
+    BigDecimal taxTotal = BigDecimal.ZERO;
+
+    if (tax.getTaxLine() != null)
+      taxTotal = purchaseOrderToolService.computeAmount(exTaxBase, tax.getTaxLine().getValue());
+
+    tax.setTaxTotal(taxTotal);
+    tax.setInTaxTotal(tax.getExTaxBase().add(taxTotal));
+
+    LOG.debug(
+        "PO_EX_TAX => {}, TOTAL_CGST_TAX => {},  INCL_TAX => {}",
+        new Object[] {tax.getExTaxBase(), tax.getTaxTotal(), tax.getInTaxTotal()});
+
+    po.setCgstTax(tax);
+  }
+
+  public void setIGST(PurchaseOrder po) {
+
+    if (po.getIgstTaxLine() == null) {
+      LOG.info("NO IGST LINE FOUND");
+      return;
+    }
+
+    PurchaseOrder fkey = new PurchaseOrder();
+    fkey.setId(po.getId());
+
+    TaxLine taxLine = po.getIgstTaxLine();
+    PurchaseOrderTax tax = new PurchaseOrderTax();
+
+    // tax.setId("IGST".hashCode() * po.getId());
+    tax.setTaxName("IGST");
+    tax.setTaxRate(
+        taxLine.getValue().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_EVEN) + "%");
+    tax.setPurchaseOrder(fkey);
+    tax.setExTaxBase(po.getExTaxTotal());
+    tax.setReverseCharged(false);
+    tax.setTaxLine(taxLine);
+
+    LOG.info("For PO = {}, \n IGST_TAX_LINE = {} \n and IGST_TAX = {}", po, taxLine, tax);
+
+    // Dans la devise de la commande
+    BigDecimal exTaxBase =
+        (tax.getReverseCharged()) ? tax.getExTaxBase().negate() : tax.getExTaxBase();
+
+    BigDecimal taxTotal = BigDecimal.ZERO;
+
+    if (tax.getTaxLine() != null)
+      taxTotal = purchaseOrderToolService.computeAmount(exTaxBase, tax.getTaxLine().getValue());
+
+    tax.setTaxTotal(taxTotal);
+    tax.setInTaxTotal(tax.getExTaxBase().add(taxTotal));
+
+    LOG.debug(
+        "PO_EX_TAX => {}, TOTAL_IGST_TAX => {},  INCL_TAX => {}",
+        new Object[] {tax.getExTaxBase(), tax.getTaxTotal(), tax.getInTaxTotal()});
+
+    po.setIgstTax(tax);
+  }
+
   /**
    * Créer les lignes de TVA de la commande. La création des lignes de TVA se basent sur les lignes
    * de commande.
@@ -48,10 +180,14 @@ public class PurchaseOrderTaxService {
     List<PurchaseOrderTax> purchaseOrderTaxList = new ArrayList<PurchaseOrderTax>();
     Map<TaxLine, PurchaseOrderTax> map = new HashMap<TaxLine, PurchaseOrderTax>();
 
+    PurchaseOrder fkey = new PurchaseOrder();
+    fkey.setId(purchaseOrder.getId());
+
     if (purchaseOrder.getSgstTaxLine() != null) {
       TaxLine taxLine = purchaseOrder.getSgstTaxLine();
       PurchaseOrderTax sgstTax = new PurchaseOrderTax();
-      sgstTax.setPurchaseOrder(purchaseOrder);
+
+      sgstTax.setPurchaseOrder(fkey);
       sgstTax.setExTaxBase(purchaseOrder.getExTaxTotal());
       sgstTax.setReverseCharged(false);
       sgstTax.setTaxLine(taxLine);
@@ -68,7 +204,8 @@ public class PurchaseOrderTaxService {
     if (purchaseOrder.getCgstTaxLine() != null) {
       TaxLine taxLine = purchaseOrder.getCgstTaxLine();
       PurchaseOrderTax cgstTax = new PurchaseOrderTax();
-      cgstTax.setPurchaseOrder(purchaseOrder);
+
+      cgstTax.setPurchaseOrder(fkey);
       cgstTax.setExTaxBase(purchaseOrder.getExTaxTotal());
       cgstTax.setReverseCharged(false);
       cgstTax.setTaxLine(taxLine);
@@ -84,7 +221,9 @@ public class PurchaseOrderTaxService {
     if (purchaseOrder.getIgstTaxLine() != null) {
       TaxLine taxLine = purchaseOrder.getIgstTaxLine();
       PurchaseOrderTax igstTax = new PurchaseOrderTax();
-      igstTax.setPurchaseOrder(purchaseOrder);
+
+      igstTax.setPurchaseOrder(fkey);
+
       igstTax.setExTaxBase(purchaseOrder.getExTaxTotal());
       igstTax.setReverseCharged(false);
       igstTax.setTaxLine(taxLine);

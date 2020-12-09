@@ -20,7 +20,7 @@
            value="update" to modify an existing database;
            value="create-drop" means the same as "create" but also drops tables when Hibernate closes;
            value="validate" makes no changes to the database -->
-      <property name="hibernate.hbm2ddl.auto" value="update" />
+      <property name="hibernate.hbm2ddl.auto" value="none" />
 
     </properties>
   </persistence-unit>
