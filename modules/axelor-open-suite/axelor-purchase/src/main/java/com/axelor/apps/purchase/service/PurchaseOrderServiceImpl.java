@@ -17,21 +17,6 @@
  */
 package com.axelor.apps.purchase.service;
 
-import java.lang.invoke.MethodHandles;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.axelor.apps.ReportFactory;
 import com.axelor.apps.base.db.Blocking;
 import com.axelor.apps.base.db.Company;
@@ -71,6 +56,18 @@ import com.axelor.inject.Beans;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
+import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
@@ -124,23 +121,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     this._computePurchaseOrder(purchaseOrder);
 
     logger.info("==========FINISHED computePurchaseOrder method==============");
-
-    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    Validator validator = factory.getValidator();
-
-    logger.info("======================= FETCHING VALIDATION ERRORS============================");
-
-    logger.info("COMPANY = {}", purchaseOrder.getCompany());
-    logger.info("SUPPLIER = {}", purchaseOrder.getSupplierPartner());
-    logger.info("CURRENCY = {}", purchaseOrder.getCurrency());
-
-    Set<ConstraintViolation<PurchaseOrder>> violations = validator.validate(purchaseOrder);
-    for (ConstraintViolation<PurchaseOrder> violation : violations) {
-      logger.error("{}", violation);
-    }
-
-    logger.info("======================= FETCHING VALIDATION ERRORS============================");
-
     return purchaseOrder;
   }
 
@@ -189,9 +169,13 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
       purchaseOrder.setBasePrice(
           purchaseOrder.getBasePrice().add(purchaseOrderLine.getExTaxTotal()));
     }
-    
-    logger.info("For PO = {}, BASE_PRICE = {}, PACKAGING_CHARGES = {}, FREIGHT_CHARGES = {}",
-    		purchaseOrder.getId(), purchaseOrder.getBasePrice(), packagingForwardingCharges, freightCharges);
+
+    logger.info(
+        "For PO = {}, BASE_PRICE = {}, PACKAGING_CHARGES = {}, FREIGHT_CHARGES = {}",
+        purchaseOrder.getId(),
+        purchaseOrder.getBasePrice(),
+        packagingForwardingCharges,
+        freightCharges);
 
     purchaseOrder.setExTaxTotal(
         purchaseOrder.getBasePrice().add(packagingForwardingCharges).add(freightCharges));
