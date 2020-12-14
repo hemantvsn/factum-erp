@@ -59,10 +59,16 @@
 	<one-to-one ref="com.axelor.apps.purchase.db.PurchaseOrderTax" name="cgstTax" readonly="true"></one-to-one>
 	<one-to-one ref="com.axelor.apps.purchase.db.PurchaseOrderTax" name="igstTax" readonly="true"></one-to-one>
 	
+	
+	<decimal name="basePrice" title="Base Price" scale="2" precision="20" readonly="true"/>
     <decimal name="exTaxTotal" title="Total W.T." scale="2" precision="20" readonly="true"/>
     <decimal name="taxTotal" title="Total Tax" scale="2" precision="20" readonly="true"/>
     <decimal name="inTaxTotal" title="Total A.T.I." scale="2" precision="20" readonly="true"/>
 	<decimal name="amountToBeSpreadOverTheTimetable" title="Amount to be spread over the timetable" scale="2" precision="20" readonly="true"/>
+	
+	
+	<decimal name="packagingForwardingCharges" title="Packaging And Forwarding Charges" scale="2" precision="20" default="0" required="true"/>
+	<decimal name="freightCharges" title="Freight Charges" scale="2" precision="20" default="0" required="true"/>
     
     <decimal name="companyExTaxTotal" title="Total W.T." scale="2" precision="20" readonly="true"/>
 

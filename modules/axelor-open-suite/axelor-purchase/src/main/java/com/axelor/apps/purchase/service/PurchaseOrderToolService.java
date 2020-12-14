@@ -49,7 +49,7 @@ public class PurchaseOrderToolService {
             .setScale(AppBaseService.DEFAULT_NB_DECIMAL_DIGITS, RoundingMode.HALF_EVEN);
 
     LOG.debug(
-        "Calcul du montant HT avec une quantité de {} pour {} : {}",
+        "QUANTITY = {} PRICE_PER_UNIT = {}, AMOUNT = {}",
         new Object[] {quantity, price, amount});
 
     return amount;

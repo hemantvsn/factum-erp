@@ -17,6 +17,21 @@
  */
 package com.axelor.apps.purchase.service;
 
+import java.lang.invoke.MethodHandles;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.axelor.apps.ReportFactory;
 import com.axelor.apps.base.db.Blocking;
 import com.axelor.apps.base.db.Company;
@@ -56,18 +71,6 @@ import com.axelor.inject.Beans;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
-import java.lang.invoke.MethodHandles;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
@@ -173,19 +176,26 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
   @Override
   public void _computePurchaseOrder(PurchaseOrder purchaseOrder) throws AxelorException {
 
+    purchaseOrder.setBasePrice(BigDecimal.ZERO);
     purchaseOrder.setExTaxTotal(BigDecimal.ZERO);
     purchaseOrder.setCompanyExTaxTotal(BigDecimal.ZERO);
     purchaseOrder.setTaxTotal(BigDecimal.ZERO);
     purchaseOrder.setInTaxTotal(BigDecimal.ZERO);
 
-    for (PurchaseOrderLine purchaseOrderLine : purchaseOrder.getPurchaseOrderLineList()) {
-      purchaseOrder.setExTaxTotal(
-          purchaseOrder.getExTaxTotal().add(purchaseOrderLine.getExTaxTotal()));
+    BigDecimal packagingForwardingCharges = purchaseOrder.getPackagingForwardingCharges();
+    BigDecimal freightCharges = purchaseOrder.getFreightCharges();
 
-      // In the company accounting currency
-      purchaseOrder.setCompanyExTaxTotal(
-          purchaseOrder.getCompanyExTaxTotal().add(purchaseOrderLine.getCompanyExTaxTotal()));
+    for (PurchaseOrderLine purchaseOrderLine : purchaseOrder.getPurchaseOrderLineList()) {
+      purchaseOrder.setBasePrice(
+          purchaseOrder.getBasePrice().add(purchaseOrderLine.getExTaxTotal()));
     }
+    
+    logger.info("For PO = {}, BASE_PRICE = {}, PACKAGING_CHARGES = {}, FREIGHT_CHARGES = {}",
+    		purchaseOrder.getId(), purchaseOrder.getBasePrice(), packagingForwardingCharges, freightCharges);
+
+    purchaseOrder.setExTaxTotal(
+        purchaseOrder.getBasePrice().add(packagingForwardingCharges).add(freightCharges));
+    purchaseOrder.setCompanyExTaxTotal(purchaseOrder.getExTaxTotal());
 
     purchaseOrderTaxService.setCGST(purchaseOrder);
     purchaseOrderTaxService.setSGST(purchaseOrder);
