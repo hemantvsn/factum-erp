@@ -112,9 +112,6 @@ public class PurchaseOrderTaxService {
       return;
     }
 
-    PurchaseOrder fkey = new PurchaseOrder();
-    fkey.setId(po.getId());
-
     TaxLine taxLine = po.getSgstTaxLine();
     PurchaseOrderTax tax = new PurchaseOrderTax();
 
@@ -123,7 +120,6 @@ public class PurchaseOrderTaxService {
     tax.setTaxRate(
         taxLine.getValue().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_EVEN) + "%");
 
-    tax.setPurchaseOrder(fkey);
     tax.setExTaxBase(po.getExTaxTotal());
     tax.setReverseCharged(false);
     tax.setTaxLine(taxLine);
@@ -156,9 +152,6 @@ public class PurchaseOrderTaxService {
       return;
     }
 
-    PurchaseOrder fkey = new PurchaseOrder();
-    fkey.setId(po.getId());
-
     TaxLine taxLine = po.getCgstTaxLine();
     PurchaseOrderTax tax = new PurchaseOrderTax();
 
@@ -167,7 +160,6 @@ public class PurchaseOrderTaxService {
     tax.setTaxRate(
         taxLine.getValue().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_EVEN) + "%");
 
-    tax.setPurchaseOrder(fkey);
     tax.setExTaxBase(po.getExTaxTotal());
     tax.setReverseCharged(false);
     tax.setTaxLine(taxLine);
@@ -200,9 +192,6 @@ public class PurchaseOrderTaxService {
       return;
     }
 
-    PurchaseOrder fkey = new PurchaseOrder();
-    fkey.setId(po.getId());
-
     TaxLine taxLine = po.getIgstTaxLine();
     PurchaseOrderTax tax = new PurchaseOrderTax();
 
@@ -210,7 +199,7 @@ public class PurchaseOrderTaxService {
     tax.setTaxName("IGST");
     tax.setTaxRate(
         taxLine.getValue().multiply(new BigDecimal(100)).setScale(2, RoundingMode.HALF_EVEN) + "%");
-    tax.setPurchaseOrder(fkey);
+
     tax.setExTaxBase(po.getExTaxTotal());
     tax.setReverseCharged(false);
     tax.setTaxLine(taxLine);
@@ -248,14 +237,10 @@ public class PurchaseOrderTaxService {
     List<PurchaseOrderTax> purchaseOrderTaxList = new ArrayList<PurchaseOrderTax>();
     Map<TaxLine, PurchaseOrderTax> map = new HashMap<TaxLine, PurchaseOrderTax>();
 
-    PurchaseOrder fkey = new PurchaseOrder();
-    fkey.setId(purchaseOrder.getId());
-
     if (purchaseOrder.getSgstTaxLine() != null) {
       TaxLine taxLine = purchaseOrder.getSgstTaxLine();
       PurchaseOrderTax sgstTax = new PurchaseOrderTax();
 
-      sgstTax.setPurchaseOrder(fkey);
       sgstTax.setExTaxBase(purchaseOrder.getExTaxTotal());
       sgstTax.setReverseCharged(false);
       sgstTax.setTaxLine(taxLine);
@@ -273,7 +258,6 @@ public class PurchaseOrderTaxService {
       TaxLine taxLine = purchaseOrder.getCgstTaxLine();
       PurchaseOrderTax cgstTax = new PurchaseOrderTax();
 
-      cgstTax.setPurchaseOrder(fkey);
       cgstTax.setExTaxBase(purchaseOrder.getExTaxTotal());
       cgstTax.setReverseCharged(false);
       cgstTax.setTaxLine(taxLine);
@@ -289,8 +273,6 @@ public class PurchaseOrderTaxService {
     if (purchaseOrder.getIgstTaxLine() != null) {
       TaxLine taxLine = purchaseOrder.getIgstTaxLine();
       PurchaseOrderTax igstTax = new PurchaseOrderTax();
-
-      igstTax.setPurchaseOrder(fkey);
 
       igstTax.setExTaxBase(purchaseOrder.getExTaxTotal());
       igstTax.setReverseCharged(false);
