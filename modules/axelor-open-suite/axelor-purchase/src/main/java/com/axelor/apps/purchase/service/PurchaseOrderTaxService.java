@@ -18,6 +18,8 @@
 package com.axelor.apps.purchase.service;
 
 import com.axelor.apps.account.db.TaxLine;
+import com.axelor.apps.account.db.repo.TaxLineRepository;
+import com.axelor.apps.base.db.TaxType;
 import com.axelor.apps.purchase.db.PurchaseOrder;
 import com.axelor.apps.purchase.db.PurchaseOrderTax;
 import com.google.inject.Inject;
@@ -36,6 +38,70 @@ public class PurchaseOrderTaxService {
   private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Inject private PurchaseOrderToolService purchaseOrderToolService;
+
+  @Inject private TaxLineRepository taxLineRepo;
+
+  public void initPOTaxLines(PurchaseOrder po) {
+
+    List<TaxLine> taxLines = taxLineRepo.all().fetch();
+
+    TaxLine SGST_0 =
+        taxLines.stream()
+            .filter(
+                tx ->
+                    tx.getName().startsWith("SGST")
+                        && tx.getValue().compareTo(BigDecimal.ZERO) == 0)
+            .findFirst()
+            .orElse(null);
+
+    TaxLine CGST_0 =
+        taxLines.stream()
+            .filter(
+                tx ->
+                    tx.getName().startsWith("CGST")
+                        && tx.getValue().compareTo(BigDecimal.ZERO) == 0)
+            .findFirst()
+            .orElse(null);
+
+    TaxLine IGST_0 =
+        taxLines.stream()
+            .filter(
+                tx ->
+                    tx.getName().startsWith("IGST")
+                        && tx.getValue().compareTo(BigDecimal.ZERO) == 0)
+            .findFirst()
+            .orElse(null);
+
+    LOG.info(
+        "The zero TAX_LINES are \n SGST0 : {} \n CGST0 : {} \n IGST0 : {}", SGST_0, CGST_0, IGST_0);
+
+    TaxType taxType = po.getTaxType();
+
+    if (null == taxType) {
+      LOG.info("Since TAX_TYPE = EMPTY, setting all taxes to 0");
+
+      po.setCgstTaxLine(CGST_0);
+      po.setSgstTaxLine(SGST_0);
+      po.setIgstTaxLine(IGST_0);
+
+      return;
+    }
+
+    if (taxType == TaxType.INTER_STATE) {
+      LOG.info("Since TAX_TYPE = INTER_STATE, setting IGST to 0");
+      po.setIgstTaxLine(IGST_0);
+      return;
+    }
+
+    if (taxType == TaxType.INTRA_STATE) {
+      LOG.info("Since TAX_TYPE = INTRA_STATE, setting CGST and SGST to 0");
+      po.setCgstTaxLine(CGST_0);
+      po.setSgstTaxLine(SGST_0);
+      return;
+    }
+
+    LOG.error("ILLEGAL TAX TYPE configured - TAXTYPE = {}", taxType);
+  }
 
   public void setSGST(PurchaseOrder po) {
 

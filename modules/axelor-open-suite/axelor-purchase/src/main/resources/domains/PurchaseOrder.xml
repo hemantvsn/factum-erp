@@ -59,6 +59,8 @@
 	<one-to-one ref="com.axelor.apps.purchase.db.PurchaseOrderTax" name="cgstTax" readonly="true"></one-to-one>
 	<one-to-one ref="com.axelor.apps.purchase.db.PurchaseOrderTax" name="igstTax" readonly="true"></one-to-one>
 	
+	<enum name="taxType" ref="com.axelor.apps.base.db.TaxType" />
+	
 	
 	<decimal name="basePrice" title="Base Price" scale="2" precision="20" readonly="true"/>
     <decimal name="exTaxTotal" title="Total W.T." scale="2" precision="20" readonly="true"/>

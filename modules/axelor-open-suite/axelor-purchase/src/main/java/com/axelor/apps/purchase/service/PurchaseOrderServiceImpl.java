@@ -61,11 +61,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,6 +107,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
   public PurchaseOrder computePurchaseOrder(PurchaseOrder purchaseOrder) throws AxelorException {
 
     this.initPurchaseOrderLineTax(purchaseOrder);
+    this.initPOTaxLines(purchaseOrder);
     this.initPurchaseOrderTax(purchaseOrder);
 
     this._computePurchaseOrderLines(purchaseOrder);
@@ -248,6 +244,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
   private void initPurchaseOrderTax(PurchaseOrder purchaseOrder) {
 
     logger.info("Initialized PurchaseOrderTaxList to EMPTY_ARRAY for PO = {}", purchaseOrder);
+  }
+
+  private void initPOTaxLines(PurchaseOrder purchaseOrder) {
+    purchaseOrderTaxService.initPOTaxLines(purchaseOrder);
   }
 
   @Override

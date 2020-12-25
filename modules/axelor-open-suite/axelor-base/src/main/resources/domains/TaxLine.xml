@@ -16,9 +16,8 @@
 	    <![CDATA[
 	    	String name = "";
 	    	if(tax != null)  { name += tax.getName();  }
-	    	name += " : " + value;
-			name += " : " + startDate;
-			if (endDate != null) { name += " - " + endDate; }
+	    	name += "@" + (value.multiply(new BigDecimal(100)).setScale(2));
+	    	name += "%";
 	    	return name;
 	   	]]>
    	</string>
