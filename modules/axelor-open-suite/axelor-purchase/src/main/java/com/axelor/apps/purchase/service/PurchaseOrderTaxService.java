@@ -88,13 +88,15 @@ public class PurchaseOrderTaxService {
     }
 
     if (taxType == TaxType.INTRA_STATE) {
-      LOG.info("Since TAX_TYPE = INTRA_STATE, only CGST and SGST will be applicable, HENCE setting IGST to 0");
+      LOG.info(
+          "Since TAX_TYPE = INTRA_STATE, only CGST and SGST will be applicable, HENCE setting IGST to 0");
       po.setIgstTaxLine(IGST_0);
       return;
     }
 
     if (taxType == TaxType.INTER_STATE) {
-      LOG.info("Since TAX_TYPE = INTER_STATE, only IGST will be applicable, HENCE setting CGST and SGST to 0");
+      LOG.info(
+          "Since TAX_TYPE = INTER_STATE, only IGST will be applicable, HENCE setting CGST and SGST to 0");
       po.setCgstTaxLine(CGST_0);
       po.setSgstTaxLine(SGST_0);
       return;
