@@ -7,19 +7,20 @@
 
 	<entity name="Product" lang="java">
 
-		<string name="name" title="Name" initParam="true"
-			translatable="true" />
+		<string name="name" title="Name" initParam="true" translatable="true" />
+		
 		<string name="serialNumber" title="Serial Nbr"/>
-		<string name="code" title="Code" initParam="true" unique="true"/>
+		
+		<string name="code" title="Code" initParam="true" unique="true" readonly="true"/>
 
-		<string name="description" large="true" title="Description"
-			initParam="true" translatable="true" />
-		<string name="internalDescription" large="true" title="Internal description"
-			initParam="true" />
-		<many-to-one name="picture" ref="com.axelor.meta.db.MetaFile"
-			initParam="true" />
-		<many-to-one name="productCategory" ref="ProductCategory"
-			title="Product category" initParam="true" massUpdate="true" />
+		<string name="description" large="true" title="Description" initParam="true" translatable="true" />
+		<string name="internalDescription" large="true" title="Internal description" initParam="true" />
+		
+		
+		<many-to-one name="picture" ref="com.axelor.meta.db.MetaFile" initParam="true" />
+		
+		<many-to-one name="productCategory" ref="ProductCategory" title="Product category" initParam="true" massUpdate="true" required="true"/>
+		
 		<many-to-one name="productFamily" ref="ProductFamily"
 			title="Accounting family" initParam="true" massUpdate="true"/>
 		<many-to-one name="unit" ref="Unit" title="Unit"

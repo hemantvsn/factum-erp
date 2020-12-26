@@ -18,6 +18,7 @@
 package com.axelor.apps.base.db.repo;
 
 import com.axelor.apps.base.db.Product;
+import com.axelor.apps.base.db.ProductCategory;
 import com.axelor.apps.base.service.BarcodeGeneratorService;
 import com.axelor.apps.base.service.ProductService;
 import com.axelor.apps.base.service.app.AppBaseService;
@@ -26,14 +27,20 @@ import com.axelor.exception.AxelorException;
 import com.axelor.inject.Beans;
 import com.axelor.meta.MetaFiles;
 import com.axelor.meta.db.MetaFile;
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.PersistenceException;
 import javax.validation.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProductBaseRepository extends ProductRepository {
+
+  private final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Inject private MetaFiles metaFiles;
 
@@ -47,14 +54,16 @@ public class ProductBaseRepository extends ProductRepository {
 
   @Override
   public Product save(Product product) {
-    try {
+    /*try {
       if (appBaseService.getAppBase().getGenerateProductSequence()
           && Strings.isNullOrEmpty(product.getCode())) {
         product.setCode(Beans.get(ProductService.class).getSequence());
       }
     } catch (Exception e) {
       throw new PersistenceException(e.getLocalizedMessage());
-    }
+    }*/
+
+    updateProductCode(product);
 
     product.setFullName(String.format(FULL_NAME_FORMAT, product.getCode(), product.getName()));
 
@@ -96,6 +105,47 @@ public class ProductBaseRepository extends ProductRepository {
       }
     }
     return super.save(product);
+  }
+
+  /**
+   * Product Code should be auto-generated.
+   *
+   * <p>It should be combination of
+   *
+   * <p>1. PRODUCT_CATEGORY_CODE 2. NEXT NUMBER IN SEQUENCE FOR THAT CATEGORY
+   *
+   * @param product
+   */
+  private void updateProductCode(Product product) {
+
+    // This cannot be null
+    ProductCategory cat = product.getProductCategory();
+
+    int seq = getNextNumberForCategory(cat);
+
+    product.setCode(cat.getCode() + seq);
+
+    LOG.info("The product code is now set to - {}", product.getCode());
+  }
+
+  /**
+   * Finds the last product in same category
+   *
+   * @param cat
+   * @return
+   */
+  private int getNextNumberForCategory(ProductCategory cat) {
+
+    LOG.info("Finding NEXT_NUMBER_FOR_CATEGORY = {}", cat);
+
+    List<Product> productsWithSameCategory =
+        this.all().fetch().stream()
+            .filter(p -> p.getProductCategory().equals(cat))
+            .collect(Collectors.toList());
+
+    LOG.info("Found {} products belonging to category - {}", productsWithSameCategory.size(), cat);
+
+    return productsWithSameCategory.size() + 1;
   }
 
   @Override
