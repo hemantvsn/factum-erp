@@ -5,7 +5,7 @@
 
   <entity sequential="true" name="PurchaseOrderTax" lang="java">
   
-  	<many-to-one name="purchaseOrder" ref="PurchaseOrder" title="Purchase order"/>
+  	<!--  <many-to-one name="purchaseOrder" ref="PurchaseOrder" title="Purchase order"/> -->
   	<many-to-one name="taxLine" ref="com.axelor.apps.account.db.TaxLine" title="Tax"/>
   	
   	<string name="taxName" title="TAX NAME"></string>

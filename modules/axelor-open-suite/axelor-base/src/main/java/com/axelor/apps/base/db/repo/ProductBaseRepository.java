@@ -23,6 +23,7 @@ import com.axelor.apps.base.service.BarcodeGeneratorService;
 import com.axelor.apps.base.service.ProductService;
 import com.axelor.apps.base.service.app.AppBaseService;
 import com.axelor.apps.tool.service.TranslationService;
+import com.axelor.common.StringUtils;
 import com.axelor.exception.AxelorException;
 import com.axelor.inject.Beans;
 import com.axelor.meta.MetaFiles;
@@ -117,6 +118,17 @@ public class ProductBaseRepository extends ProductRepository {
    * @param product
    */
   private void updateProductCode(Product product) {
+    LOG.info("For PRODUCT : {}, CODE IS {}", product, product.getCode());
+
+    if (StringUtils.notBlank(product.getCode())) {
+      LOG.info(
+          "For PRODUCT : {}, CODE IS {} Already Set. No need to compute again",
+          product,
+          product.getCode());
+      return;
+    }
+
+    LOG.info("For PRODUCT : {}, CODE IS BLANK.....Computing it", product, product.getCode());
 
     // This cannot be null
     ProductCategory cat = product.getProductCategory();
